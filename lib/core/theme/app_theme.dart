@@ -21,8 +21,8 @@ final ThemeData lightTheme = ThemeData.light().copyWith(
   ),
   dividerColor: Colors.grey[300],
   snackBarTheme: SnackBarThemeData(
-    backgroundColor: Colors.grey[800],
-    contentTextStyle: const TextStyle(color: Colors.white),
+    backgroundColor: Color(0xff5269FF),
+    contentTextStyle: GoogleFonts.poppins().copyWith(color: Colors.white),
   ),
   pageTransitionsTheme: PageTransitionsTheme(
       builders: {
@@ -48,8 +48,8 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     elevation: 0,
   ),
   snackBarTheme: SnackBarThemeData(
-    backgroundColor: Colors.grey[700],
-    contentTextStyle: const TextStyle(color: Colors.white),
+    backgroundColor: Color(0xff5269FF),
+    contentTextStyle: GoogleFonts.poppins().copyWith(color: Colors.white),
   ),
   pageTransitionsTheme: PageTransitionsTheme(
       builders: {
