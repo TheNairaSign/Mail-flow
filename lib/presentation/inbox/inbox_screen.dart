@@ -74,7 +74,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                       Navigator.pushReplacementNamed(context, '/');
                     }
                   },
-                  child: const Icon(CupertinoIcons.arrow_right_circle),
+                  child: const Icon(Icons.logout),
                 ),
               ),
               SliverToBoxAdapter(
@@ -147,6 +147,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
             child: Hero(
               tag: 'compose_hero',
               child: CupertinoButton.filled(
+                borderRadius: BorderRadius.circular(15),
                 onPressed: () {
                   Navigator.push(
                     context,

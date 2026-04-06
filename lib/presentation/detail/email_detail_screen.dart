@@ -15,6 +15,8 @@ class EmailDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final emailDetailAsyncValue = ref.watch(emailDetailProvider(emailId));
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       appBar: AppBar(
         title: emailDetailAsyncValue.when(
@@ -84,7 +86,7 @@ class EmailDetailScreen extends ConsumerWidget {
                     ),
                   ],
                 ),
-                const Divider(height: 32),
+                Divider(height: 32, color: isDark ? Colors.grey[800] : Colors.grey[300],),
                 Text(
                   email.fullBody,
                   style: Theme.of(context).textTheme.bodyLarge,
