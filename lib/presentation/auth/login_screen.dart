@@ -87,6 +87,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 48),
                 Card(
+                  color: colorScheme.surface,
                   elevation: 4,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16),
@@ -98,10 +99,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         TextFormField(
                           controller: _emailController,
+                          cursorColor: colorScheme.primary,
                           decoration: InputDecoration(
                             labelText: 'Email',
+                            hintText: 'Enter your email',
+                            hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                              gapPadding: 0,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: colorScheme.primary),
+                              gapPadding: 0,
                             ),
                             prefixIcon: const Icon(Icons.email),
                           ),
@@ -119,10 +130,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         const SizedBox(height: 16),
                         TextFormField(
                           controller: _passwordController,
+                          cursorColor: colorScheme.primary,
                           decoration: InputDecoration(
                             labelText: 'Password',
+                            hintText: 'Enter your password',
+                            hintStyle: textTheme.bodyMedium?.copyWith(color: Colors.grey),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide.none,
+                              gapPadding: 0,
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: colorScheme.primary),
+                              gapPadding: 0,
                             ),
                             prefixIcon: const Icon(Icons.lock),
                           ),
@@ -150,7 +171,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
-                                child: const Text('Login'),
+                                child: Text('Login', style: textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white
+                                ),),
                               ),
                       ],
                     ),

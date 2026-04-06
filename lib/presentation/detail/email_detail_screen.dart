@@ -1,4 +1,3 @@
-import 'package:email_snaarp/domain/entities/email_entity.dart';
 import 'package:email_snaarp/presentation/detail/detail_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

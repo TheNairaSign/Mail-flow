@@ -83,18 +83,22 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
     return PopScope(
       canPop: !_isSending, // Prevent popping while sending
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
         final shouldPop = await _onWillPop();
-        if (shouldPop) {
+        if (shouldPop && context.mounted) {
           if (mounted) Navigator.pop(context);
         }
       },
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text('Compose'),
+      child: Hero(
+        tag: 'compose_hero',
+        child: Scaffold(
+          appBar: AppBar(
+          title: const Text('New message'),
           leading: IconButton(
             icon: const Icon(Icons.close),
             onPressed: () async {
@@ -110,69 +114,139 @@ class _ComposeScreenState extends ConsumerState<ComposeScreen> {
                     padding: EdgeInsets.all(8.0),
                     child: CircularProgressIndicator(color: Colors.white),
                   )
-                : IconButton(
-                    icon: const Icon(Icons.send),
-                    onPressed: _sendEmail,
+                : Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ElevatedButton(
+                      onPressed: _sendEmail,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+                        foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                      ),
+                      child: const Text('Send'),
+                    ),
                   ),
           ],
         ),
         body: Form(
           key: _formKey,
-          child: ListView(
-            padding: const EdgeInsets.all(16.0),
+          child: Column( // Changed to Column to allow for Dividers
             children: [
-              TextFormField(
-                controller: _toController,
-                decoration: const InputDecoration(
-                  labelText: 'To',
-                  border: OutlineInputBorder(),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero, // Remove padding from ListView
+                  children: [
+                    TextFormField(
+                      controller: _toController,
+                      decoration: InputDecoration(
+                        hintText: 'To', // Changed to hintText
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: colorScheme.surface, // Use surface for background
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter recipient email';
+                        }
+                        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+                          return 'Please enter a valid email address';
+                        }
+                        return null;
+                      },
+                    ),
+                    Divider(height: 1, color: colorScheme.outlineVariant), // Thin divider
+                    TextFormField(
+                      controller: _subjectController,
+                      decoration: InputDecoration(
+                        hintText: 'Subject', // Changed to hintText
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: colorScheme.surface, // Use surface for background
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a subject';
+                        }
+                        return null;
+                      },
+                    ),
+                    Divider(height: 1, color: colorScheme.outlineVariant), // Thin divider
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: 'Cc/Bcc', // New field
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: colorScheme.surface, // Use surface for background
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                    ),
+                    Divider(height: 1, color: colorScheme.outlineVariant), // Thin divider
+                    TextFormField(
+                      controller: _bodyController,
+                      decoration: InputDecoration(
+                        hintText: 'Compose email', // Changed to hintText
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: colorScheme.surface, // Use surface for background
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                      ),
+                      maxLines: null, // Allows the field to expand
+                      minLines: 10,
+                      keyboardType: TextInputType.multiline,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter email body';
+                        }
+                        return null;
+                      },
+                    ),
+                  ],
                 ),
-                keyboardType: TextInputType.emailAddress,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter recipient email';
-                  }
-                  if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
-                    return 'Please enter a valid email address';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _subjectController,
-                decoration: const InputDecoration(
-                  labelText: 'Subject',
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter a subject';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _bodyController,
-                decoration: const InputDecoration(
-                  labelText: 'Body',
-                  border: OutlineInputBorder(),
-                ),
-                maxLines: null, // Allows the field to expand
-                minLines: 10,
-                keyboardType: TextInputType.multiline,
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter email body';
-                  }
-                  return null;
-                },
               ),
             ],
           ),
         ),
+        bottomNavigationBar: BottomAppBar(
+          height: 60,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.chat_bubble_outline),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Chat feature coming soon')),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.attachment),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Attachment feature coming soon')),
+                  );
+                },
+              ),
+              IconButton(
+                icon: const Icon(Icons.star_border),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Star feature coming soon')),
+                  );
+                },
+              ),
+              const Spacer(), // Pushes icons to the left
+            ],
+          ),
+        ),
       ),
-    );
+    ),
+  );
   }
 }

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:universal_back_gesture/back_gesture_config.dart';
 import 'package:universal_back_gesture/back_gesture_page_transitions_builder.dart';
 
 final pageConfig =  BackGesturePageTransitionsBuilder(
@@ -9,9 +8,10 @@ final pageConfig =  BackGesturePageTransitionsBuilder(
   );
 
 final ThemeData lightTheme = ThemeData.light().copyWith(
-  textTheme: GoogleFonts.poppinsTextTheme(),
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color(0xFF1A73E8), // Deep blue, similar to Gmail
+  textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
+  colorScheme: ColorScheme.light(
+    primary: Color(0xff5269FF),
+    secondary: Color(0xff5269FF),
     brightness: Brightness.light,
   ),
   appBarTheme: const AppBarTheme(
@@ -32,13 +32,16 @@ final ThemeData lightTheme = ThemeData.light().copyWith(
 );
 
 final ThemeData darkTheme = ThemeData.dark().copyWith(
-  textTheme: GoogleFonts.poppinsTextTheme(),
-  colorScheme: ColorScheme.fromSeed(
-    seedColor: const Color(0xFF1A73E8), // Deep blue, similar to Gmail
+  textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
+  scaffoldBackgroundColor: Color(0xff09090B),
+  colorScheme: ColorScheme.dark(
+    primary: Color(0xff5269FF),
+    secondary: Color(0xff5269FF),
     brightness: Brightness.dark,
+    surface: Color(0xff151515)
   ),
   appBarTheme: AppBarTheme(
-    backgroundColor: Colors.grey[900],
+    backgroundColor: Color(0xff101010),
     foregroundColor: Colors.white,
     elevation: 0,
   ),

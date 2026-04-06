@@ -33,8 +33,6 @@ class MyApp extends ConsumerWidget {
           case '/email_detail':
             final args = settings.arguments as String?;
             return MaterialPageRoute(builder: (_) => EmailDetailScreen(emailId: args!));
-          case '/compose':
-            return MaterialPageRoute(builder: (_) => const ComposeScreen());
           default:
             return MaterialPageRoute(builder: (_) => const Text('Error: Unknown route'));
         }

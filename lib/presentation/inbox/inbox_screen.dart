@@ -2,8 +2,10 @@ import 'package:email_snaarp/domain/entities/email_entity.dart';
 import 'package:email_snaarp/presentation/auth/auth_provider.dart';
 import 'package:email_snaarp/presentation/inbox/inbox_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart'; // Import Cupertino
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart'; // For date formatting
+import 'package:email_snaarp/presentation/compose/compose_screen.dart'; // Import ComposeScreen
 
 class InboxScreen extends ConsumerStatefulWidget {
   const InboxScreen({super.key});
@@ -54,92 +56,116 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     final inboxAsyncValue = ref.watch(inboxProvider);
     final filteredEmails = ref.watch(filteredEmailsProvider(_searchQuery));
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Inbox'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await ref.read(authProvider.notifier).logout();
-              if (context.mounted) {
-                Navigator.pushReplacementNamed(context, '/');
-              }
-            },
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(kToolbarHeight),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search by sender or subject',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  borderSide: BorderSide.none,
+    return CupertinoPageScaffold(
+      child: Stack(
+        children: [
+          CustomScrollView(
+            slivers: [
+              CupertinoSliverNavigationBar(
+                enableBackgroundFilterBlur: true,
+                backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+                largeTitle: const Text('Inbox'),
+                trailing: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () async {
+                    await ref.read(authProvider.notifier).logout();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/');
+                    }
+                  },
+                  child: const Icon(CupertinoIcons.arrow_right_circle),
                 ),
-                filled: true,
-                fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                  child: SizedBox(
+                    height: 50,
+                    child: CupertinoSearchTextField(
+                      controller: _searchController,
+                      placeholder: 'Search by sender or subject',
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ),
+                ),
+              ),
+              CupertinoSliverRefreshControl(
+                onRefresh: () => ref.read(inboxProvider.notifier).fetchEmails(),
+              ),
+              inboxAsyncValue.when(
+                loading: () => _buildSkeletonLoader(),
+                error: (err, stack) => SliverFillRemaining(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text('Failed to load emails.'),
+                        CupertinoButton(
+                          onPressed: () => ref.read(inboxProvider.notifier).fetchEmails(),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                data: (emails) {
+                  if (filteredEmails.isEmpty && _searchQuery.isNotEmpty) {
+                    return const SliverFillRemaining(child: Center(child: Text('No matching emails found.')));
+                  } else if (filteredEmails.isEmpty) {
+                    return const SliverFillRemaining(child: Center(child: Text('No emails in your inbox.')));
+                  }
+                  return SliverList.builder(
+                    itemCount: filteredEmails.length,
+                    itemBuilder: (context, index) {
+                      final email = filteredEmails[index];
+                      return EmailListTile(
+                        email: email,
+                        onTap: () {
+                          // Navigate to detail screen
+                          Navigator.pushNamed(context, '/email_detail', arguments: email.id);
+                          // Mark as read when tapped
+                          ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
+                        },
+                        formatTimestamp: _formatTimestamp,
+                      );
+                    },
+                  );
+                },
+              ),
+            ],
+          ),
+          Positioned(
+            bottom: 16.0,
+            right: 16.0,
+            child: Hero(
+              tag: 'compose_hero',
+              child: CupertinoButton.filled(
+                onPressed: () {
+                  showGeneralDialog(
+                    context: context,
+                    barrierDismissible: true,
+                    barrierLabel: 'Dismiss',
+                    pageBuilder: (context, animation, secondaryAnimation) {
+                      return const Center(
+                        child: SingleChildScrollView(
+                          child: ComposeScreen(),
+                        ),
+                      );
+                    },
+                  );
+                },
+                child: const Icon(Icons.edit, color: Colors.white),
               ),
             ),
           ),
-        ),
-      ),
-      body: RefreshIndicator(
-        onRefresh: () => ref.read(inboxProvider.notifier).fetchEmails(),
-        child: inboxAsyncValue.when(
-          loading: () => _buildSkeletonLoader(),
-          error: (err, stack) => Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Text('Failed to load emails.'),
-                ElevatedButton(
-                  onPressed: () => ref.read(inboxProvider.notifier).fetchEmails(),
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          ),
-          data: (emails) {
-            if (filteredEmails.isEmpty && _searchQuery.isNotEmpty) {
-              return const Center(child: Text('No matching emails found.'));
-            } else if (filteredEmails.isEmpty) {
-              return const Center(child: Text('No emails in your inbox.'));
-            }
-            return ListView.builder(
-              itemCount: filteredEmails.length,
-              itemBuilder: (context, index) {
-                final email = filteredEmails[index];
-                return EmailListTile(
-                  email: email,
-                  onTap: () {
-                    // Navigate to detail screen
-                    Navigator.pushNamed(context, '/email_detail', arguments: email.id);
-                    // Mark as read when tapped
-                    ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
-                  },
-                  formatTimestamp: _formatTimestamp,
-                );
-              },
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.pushNamed(context, '/compose');
-        },
-        child: const Icon(Icons.edit),
+        ],
       ),
     );
   }
 
   Widget _buildSkeletonLoader() {
-    return ListView.builder(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return SliverList.builder(
       itemCount: 10, // Number of skeleton items
       itemBuilder: (context, index) {
         return Padding(
@@ -148,7 +174,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               CircleAvatar(
-                backgroundColor: Colors.grey[300],
+                backgroundColor: isDark ? Colors.grey[800] : Colors.grey[300],
                 radius: 24,
               ),
               const SizedBox(width: 16),
@@ -156,16 +182,32 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: double.infinity,
-                      height: 16,
-                      color: Colors.grey[300],
-                      margin: const EdgeInsets.only(bottom: 8),
+                    Row(
+                      children: [
+                        Container(
+                          width:  MediaQuery.of(context).size.width * 0.3,
+                          height: 16,
+                          color: isDark ? Colors.grey[800] : Colors.grey[300],
+                        ),
+                        const Spacer(),
+                        Container(
+                          width: 70,
+                          height: 10,
+                          color: isDark ? Colors.grey[800] : Colors.grey[300],
+                        ),
+                      ],
                     ),
+                    const SizedBox(height: 8),
+                    Container(
+                      width: MediaQuery.of(context).size.width * 0.4,
+                      height: 14,
+                      color: isDark ? Colors.grey[800] : Colors.grey[300],
+                    ),
+                    const SizedBox(height: 8),
                     Container(
                       width: MediaQuery.of(context).size.width * 0.6,
-                      height: 14,
-                      color: Colors.grey[300],
+                      height: 12,
+                      color: isDark ? Colors.grey[800] : Colors.grey[300],
                     ),
                   ],
                 ),
@@ -195,8 +237,9 @@ class EmailListTile extends StatelessWidget {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
-    return InkWell(
-      onTap: onTap,
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      onPressed: onTap,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         child: Row(
@@ -207,7 +250,7 @@ class EmailListTile extends StatelessWidget {
               foregroundColor: email.isRead ? colorScheme.onSecondaryContainer : colorScheme.onPrimary,
               child: Text(
                 email.senderName.isNotEmpty ? email.senderName[0].toUpperCase() : '?',
-                style: textTheme.titleMedium?.copyWith(color: colorScheme.onPrimary),
+                style: textTheme.titleMedium?.copyWith(color: Colors.white),
               ),
             ),
             const SizedBox(width: 16),
