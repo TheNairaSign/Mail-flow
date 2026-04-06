@@ -19,6 +19,7 @@ final ThemeData lightTheme = ThemeData.light().copyWith(
     foregroundColor: Colors.white,
     elevation: 0,
   ),
+  dividerColor: Colors.grey[300],
   snackBarTheme: SnackBarThemeData(
     backgroundColor: Colors.grey[800],
     contentTextStyle: const TextStyle(color: Colors.white),
@@ -40,6 +41,7 @@ final ThemeData darkTheme = ThemeData.dark().copyWith(
     brightness: Brightness.dark,
     surface: Color(0xff151515)
   ),
+  dividerColor: Colors.grey[700],
   appBarTheme: AppBarTheme(
     backgroundColor: Color(0xff101010),
     foregroundColor: Colors.white,

@@ -1,11 +1,12 @@
 import 'package:email_snaarp/domain/entities/email_entity.dart';
 import 'package:email_snaarp/presentation/auth/auth_provider.dart';
+import 'package:email_snaarp/presentation/detail/details.dart';
+import 'package:email_snaarp/presentation/detail/email_detail_screen.dart';
 import 'package:email_snaarp/presentation/inbox/inbox_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart'; // Import Cupertino
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart'; // For date formatting
-import 'package:email_snaarp/presentation/compose/compose_screen.dart'; // Import ComposeScreen
 
 class InboxScreen extends ConsumerStatefulWidget {
   const InboxScreen({super.key});
@@ -122,7 +123,13 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                         email: email,
                         onTap: () {
                           // Navigate to detail screen
-                          Navigator.pushNamed(context, '/email_detail', arguments: email.id);
+                          // Navigator.pushNamed(context, '/email_detail', arguments: email.id);
+                          Navigator.of(context).push(
+                            CupertinoPageRoute(
+                              builder: (context) => EmailDetailScreen(emailId: email.id),
+                            ),
+                          );
+
                           // Mark as read when tapped
                           ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
                         },
@@ -141,20 +148,15 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
               tag: 'compose_hero',
               child: CupertinoButton.filled(
                 onPressed: () {
-                  showGeneralDialog(
-                    context: context,
-                    barrierDismissible: true,
-                    barrierLabel: 'Dismiss',
-                    pageBuilder: (context, animation, secondaryAnimation) {
-                      return const Center(
-                        child: SingleChildScrollView(
-                          child: ComposeScreen(),
-                        ),
-                      );
-                    },
+                  Navigator.push(
+                    context,
+                    CupertinoPageRoute(
+                      builder: (context) => const ComposeEmailScreen(),
+                      // fullscreenDialog: true,
+                    ),
                   );
                 },
-                child: const Icon(Icons.edit, color: Colors.white),
+                child: const Icon(Icons.edit, color: Colors.white,),
               ),
             ),
           ),
