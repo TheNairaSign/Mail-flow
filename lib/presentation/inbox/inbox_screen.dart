@@ -1,6 +1,6 @@
 import 'package:email_snaarp/domain/entities/email_entity.dart';
 import 'package:email_snaarp/presentation/auth/auth_provider.dart';
-import 'package:email_snaarp/presentation/detail/details.dart';
+import 'package:email_snaarp/presentation/compose/compose_email.dart';
 import 'package:email_snaarp/presentation/detail/email_detail_screen.dart';
 import 'package:email_snaarp/presentation/inbox/inbox_provider.dart';
 import 'package:flutter/material.dart';
