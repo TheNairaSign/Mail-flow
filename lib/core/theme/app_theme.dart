@@ -9,13 +9,14 @@ final pageConfig =  BackGesturePageTransitionsBuilder(
 
 final ThemeData lightTheme = ThemeData.light().copyWith(
   textTheme: GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme),
+  scaffoldBackgroundColor: Colors.white,
   colorScheme: ColorScheme.light(
     primary: Color(0xff5269FF),
     secondary: Color(0xff5269FF),
     brightness: Brightness.light,
   ),
   appBarTheme: const AppBarTheme(
-    backgroundColor: Color(0xFF1A73E8),
+    backgroundColor: Color(0xff5269FF),
     foregroundColor: Colors.white,
     elevation: 0,
   ),

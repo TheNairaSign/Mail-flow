@@ -1,5 +1,8 @@
 # MailFlow — Flutter Email Client
 
+GitHub Repository:
+- `https://github.com/TheNairaSign/Mail-flow.git`
+
 ## How to Run
 1. Clone the repo: `git clone <url>` (Replace `<url>` with the actual repository URL)
 2. Run `flutter pub get`
@@ -21,7 +24,23 @@ Clean Architecture with Riverpod state management, GoRouter for navigation, and 
 - **Mock Data Strategy:** Simulating realistic email flows (recipients, attachments, quoted replies) without a backend meant designing flexible data models and placeholder content that still exercises the full UI.
 - **Form & Input Handling:** Building a recipient chip system with add/remove, Cc/Bcc toggling, and subject/body fields required careful `TextEditingController` lifecycle management and keyboard-aware layouts.
 
-## Screen Recordings / Demo
-- GitHub Repository:
-  - `https://github.com/TheNairaSign/Mail-flow.git`
+## Screenshots
+
+### Light Mode
+| Login | Inbox | Compose |
+|-------|-------|---------|
+| ![Login Light](assets/creenshots/login-light.jpg) | ![Inbox Light](assets/creenshots/inbox-light.jpg) | ![Compose Light](assets/creenshots/compose-light.jpg) |
+
+| Email Detail | Schedule Send |
+|-------------|---------------|
+| ![Details Light](assets/creenshots/details-light.jpg) | ![Schedule Light](assets/creenshots/schedule-light.jpg) |
+
+### Dark Mode
+| Login | Inbox | Compose |
+|-------|-------|---------|
+| ![Login Dark](assets/creenshots/login-dark.jpg) | ![Inbox Dark](assets/creenshots/inbox-dark.jpg) | ![Compose Dark](assets/creenshots/compose-dark.jpg) |
+
+| Email Detail | Schedule Send |
+|-------------|---------------|
+| ![Details Dark](assets/creenshots/details-dark.jpg) | ![Schedule Dark](assets/creenshots/schedule-dark.jpg) |
 

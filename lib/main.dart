@@ -22,7 +22,7 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Email Snaarp',
+      title: 'MailFlow',
       theme: lightTheme,
       darkTheme: darkTheme,
       initialRoute: '/',

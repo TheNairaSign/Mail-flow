@@ -46,7 +46,7 @@ class StartScreen extends StatelessWidget {
               FadeInUp(
                 duration: const Duration(milliseconds: 600),
                 child: Text(
-                  'Email Snaarp',
+                  'MailFlow',
                   style: textTheme.displaySmall?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: colorScheme.onSurface,
