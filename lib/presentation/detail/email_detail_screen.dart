@@ -80,11 +80,12 @@ class EmailDetailScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    Text(
-                      _formatFullTimestamp(email.timestamp),
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
                   ],
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _formatFullTimestamp(email.timestamp),
+                  style: Theme.of(context).textTheme.bodySmall,
                 ),
                 Divider(height: 32, color: isDark ? Colors.grey[800] : Colors.grey[300],),
                 Text(

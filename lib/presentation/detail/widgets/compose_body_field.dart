@@ -9,7 +9,7 @@ class ComposeBodyField extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 18, 24, 0),
+      padding: const EdgeInsets.fromLTRB(0, 18, 0, 0),
       child: TextField(
         controller: controller,
         maxLines: null,
