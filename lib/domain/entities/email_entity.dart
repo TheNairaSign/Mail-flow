@@ -9,6 +9,11 @@ class EmailEntity {
   final DateTime timestamp;
   bool isRead;
   final bool isStarred;
+  bool isArchived;
+  final String folder;
+  final String category;
+  final List<String> labels;
+  final List<String> attachments;
 
   EmailEntity({
     required this.id,
@@ -21,6 +26,11 @@ class EmailEntity {
     required this.timestamp,
     this.isRead = false,
     this.isStarred = false,
+    this.isArchived = false,
+    this.folder = 'inbox',
+    this.category = 'primary',
+    this.labels = const [],
+    this.attachments = const [],
   });
 
   EmailEntity copyWith({
@@ -34,6 +44,11 @@ class EmailEntity {
     DateTime? timestamp,
     bool? isRead,
     bool? isStarred,
+    bool? isArchived,
+    String? folder,
+    String? category,
+    List<String>? labels,
+    List<String>? attachments,
   }) {
     return EmailEntity(
       id: id ?? this.id,
@@ -46,6 +61,11 @@ class EmailEntity {
       timestamp: timestamp ?? this.timestamp,
       isRead: isRead ?? this.isRead,
       isStarred: isStarred ?? this.isStarred,
+      isArchived: isArchived ?? this.isArchived,
+      folder: folder ?? this.folder,
+      category: category ?? this.category,
+      labels: labels ?? this.labels,
+      attachments: attachments ?? this.attachments,
     );
   }
 }

@@ -44,6 +44,24 @@ class EmailDetailNotifier extends StateNotifier<AsyncValue<EmailEntity?>> {
       }
     });
   }
+
+  void toggleStar(String id) {
+    state.whenData((email) {
+      if (email != null) {
+        state = AsyncValue.data(email.copyWith(isStarred: !email.isStarred));
+        _inboxNotifier.toggleStar(id);
+      }
+    });
+  }
+
+  void archiveEmail(String id) {
+    state.whenData((email) {
+      if (email != null) {
+        state = AsyncValue.data(email.copyWith(isArchived: true, folder: 'archive'));
+        _inboxNotifier.archiveEmail(id);
+      }
+    });
+  }
 }
 
 final emailDetailProvider = StateNotifierProvider.family<EmailDetailNotifier, AsyncValue<EmailEntity?>, String>((ref, emailId) {

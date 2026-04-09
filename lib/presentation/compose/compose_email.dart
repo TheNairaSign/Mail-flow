@@ -21,6 +21,7 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
 
   bool _showCcBcc = false;
   bool _isSending = false;
+  bool _sendCancelled = false;
 
   final List<Recipient> _recipients = [];
   final List<Attachment> _attachments = [];
@@ -60,23 +61,53 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
       _showSnack('Please add at least one recipient.');
       return;
     }
-    setState(() => _isSending = true);
-
-    final success = await ref.read(composeProvider.notifier).sendEmail(
-          recipientEmail: _recipients.map((r) => r.email).join(', '),
-          subject: _subjectCtrl.text,
-          body: _bodyCtrl.text,
-        );
-
-    if (mounted) {
-      setState(() => _isSending = false);
-      if (success) {
-        _showSnack('Email sent successfully!');
-        Navigator.of(context).maybePop();
-      } else {
-        _showSnack('Failed to send email');
+    
+    // Auto append signature if not present
+    if (!_bodyCtrl.text.contains('--\nSent from MailFlow')) {
+      if (_bodyCtrl.text.isNotEmpty && !_bodyCtrl.text.endsWith('\n')) {
+         _bodyCtrl.text += '\n\n';
       }
+      _bodyCtrl.text += '--\nSent from MailFlow';
     }
+
+    _sendCancelled = false;
+    final theme = Theme.of(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Sending...'),
+        duration: const Duration(seconds: 5),
+        behavior: SnackBarBehavior.floating,
+        action: SnackBarAction(
+          label: 'UNDO',
+          textColor: theme.colorScheme.primary,
+          onPressed: () {
+            _sendCancelled = true;
+          },
+        ),
+      ),
+    ).closed.then((reason) async {
+       if (_sendCancelled) {
+          _showSnack('Send canceled');
+          return;
+       }
+
+       setState(() => _isSending = true);
+       final success = await ref.read(composeProvider.notifier).sendEmail(
+             recipientEmail: _recipients.map((r) => r.email).join(', '),
+             subject: _subjectCtrl.text,
+             body: _bodyCtrl.text,
+           );
+
+       if (mounted) {
+         setState(() => _isSending = false);
+         if (success) {
+           _showSnack('Email sent successfully!');
+           Navigator.of(context).maybePop();
+         } else {
+           _showSnack('Failed to send email');
+         }
+       }
+    });
   }
 
   void _showSnack(String msg) {
@@ -168,6 +199,18 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Row(
+                        children: [
+                          SizedBox(width: 8),
+                          Text('From', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                          SizedBox(width: 16),
+                          Text('user@mail.com', style: TextStyle(fontSize: 16)),
+                        ],
+                      ),
+                    ),
+                    const Divider(height: 1),
                     ComposeRecipientsField(
                       recipients: _recipients,
                       controller: _toCtrl,

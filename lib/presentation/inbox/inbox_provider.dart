@@ -62,6 +62,30 @@ class InboxNotifier extends StateNotifier<AsyncValue<List<EmailEntity>>> {
       // For now, let's just log or ignore for this exercise
     }
   }
+
+  void toggleStar(String id) {
+    state.whenData((emails) {
+      final updatedEmails = emails.map((email) {
+        if (email.id == id) {
+          return email.copyWith(isStarred: !email.isStarred);
+        }
+        return email;
+      }).toList();
+      state = AsyncValue.data(updatedEmails);
+    });
+  }
+
+  void archiveEmail(String id) {
+    state.whenData((emails) {
+      final updatedEmails = emails.map((email) {
+        if (email.id == id) {
+          return email.copyWith(isArchived: true, folder: 'archive'); // Mark archived
+        }
+        return email;
+      }).toList();
+      state = AsyncValue.data(updatedEmails);
+    });
+  }
 }
 
 final inboxProvider = StateNotifierProvider<InboxNotifier, AsyncValue<List<EmailEntity>>>((ref) {
@@ -70,6 +94,8 @@ final inboxProvider = StateNotifierProvider<InboxNotifier, AsyncValue<List<Email
     ref.read(deleteEmailUseCaseProvider),
   );
 });
+
+final activeFolderProvider = StateProvider<String>((ref) => 'inbox');
 
 final filteredEmailsProvider = Provider.family<List<EmailEntity>, String>((ref, query) {
   final emailsAsyncValue = ref.watch(inboxProvider);
@@ -80,8 +106,7 @@ final filteredEmailsProvider = Provider.family<List<EmailEntity>, String>((ref, 
       }
       return emails.where((email) {
         final lowerCaseQuery = query.toLowerCase();
-        return email.senderName.toLowerCase().contains(lowerCaseQuery) ||
-               email.subject.toLowerCase().contains(lowerCaseQuery);
+        return email.senderName.toLowerCase().contains(lowerCaseQuery) || email.subject.toLowerCase().contains(lowerCaseQuery);
       }).toList();
     },
     loading: () => [],
