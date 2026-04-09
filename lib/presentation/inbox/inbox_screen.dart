@@ -57,89 +57,112 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     final inboxAsyncValue = ref.watch(inboxProvider);
     final filteredEmails = ref.watch(filteredEmailsProvider(_searchQuery));
 
-    return CupertinoPageScaffold(
-      child: Stack(
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Stack(
         children: [
-          CustomScrollView(
-            slivers: [
-              CupertinoSliverNavigationBar(
-                enableBackgroundFilterBlur: true,
-                backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
-                largeTitle: const Text('Inbox'),
-                trailing: CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () async {
-                    await ref.read(authProvider.notifier).logout();
-                    if (context.mounted) {
-                      Navigator.pushReplacementNamed(context, '/');
-                    }
-                  },
-                  child: const Icon(Icons.logout),
-                ),
+          RefreshIndicator(
+            onRefresh: () => ref.read(inboxProvider.notifier).fetchEmails(),
+            child: CustomScrollView(
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
               ),
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: SizedBox(
-                    height: 50,
-                    child: CupertinoSearchTextField(
-                      controller: _searchController,
-                      placeholder: 'Search by sender or subject',
-                      style: Theme.of(context).textTheme.bodyMedium,
+              slivers: [
+                // CupertinoSliverRefreshControl(
+                //   onRefresh: () => ref.read(inboxProvider.notifier).fetchEmails(),
+                // ),
+                CupertinoSliverNavigationBar(
+                    enableBackgroundFilterBlur: true,
+                    backgroundColor: Theme.of(context).colorScheme.surface.withValues(alpha: 0.1),
+                    largeTitle: const Text('Inbox'),
+                    trailing: CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () async {
+                        await ref.read(authProvider.notifier).logout();
+                        if (context.mounted) {
+                          Navigator.pushReplacementNamed(context, '/');
+                        }
+                      },
+                      child: const Icon(Icons.logout),
                     ),
                   ),
-                ),
-              ),
-              CupertinoSliverRefreshControl(
-                onRefresh: () => ref.read(inboxProvider.notifier).fetchEmails(),
-              ),
-              inboxAsyncValue.when(
-                loading: () => _buildSkeletonLoader(),
-                error: (err, stack) => SliverFillRemaining(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Failed to load emails.'),
-                        CupertinoButton(
-                          onPressed: () => ref.read(inboxProvider.notifier).fetchEmails(),
-                          child: const Text('Retry'),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: SizedBox(
+                        height: 50,
+                        child: CupertinoSearchTextField(
+                          controller: _searchController,
+                          placeholder: 'Search by sender or subject',
+                          style: Theme.of(context).textTheme.bodyMedium,
                         ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                data: (emails) {
-                  if (filteredEmails.isEmpty && _searchQuery.isNotEmpty) {
-                    return const SliverFillRemaining(child: Center(child: Text('No matching emails found.')));
-                  } else if (filteredEmails.isEmpty) {
-                    return const SliverFillRemaining(child: Center(child: Text('No emails in your inbox.')));
-                  }
-                  return SliverList.builder(
-                    itemCount: filteredEmails.length,
-                    itemBuilder: (context, index) {
-                      final email = filteredEmails[index];
-                      return EmailListTile(
-                        email: email,
-                        onTap: () {
-                          // Navigate to detail screen
-                          // Navigator.pushNamed(context, '/email_detail', arguments: email.id);
-                          Navigator.of(context).push(
-                            CupertinoPageRoute(
-                              builder: (context) => EmailDetailScreen(emailId: email.id),
+                  inboxAsyncValue.when(
+                    loading: () => _buildSkeletonLoader(),
+                    error: (err, stack) => SliverFillRemaining(
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text('Failed to load emails.'),
+                            CupertinoButton(
+                              onPressed: () => ref.read(inboxProvider.notifier).fetchEmails(),
+                              child: const Text('Retry'),
                             ),
-                          );
-
-                          // Mark as read when tapped
-                          ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
-                        },
-                        formatTimestamp: _formatTimestamp,
-                      );
-                    },
-                  );
-                },
-              ),
-            ],
+                          ],
+                        ),
+                      ),
+                    ),
+                    data: (emails) {
+                      if (filteredEmails.isEmpty && _searchQuery.isNotEmpty) {
+                        return const SliverFillRemaining(child: Center(child: Text('No matching emails found.')));
+                      } else if (filteredEmails.isEmpty) {
+                        return const SliverFillRemaining(child: Center(child: Text('No emails in your inbox.')));
+                      }
+                      return SliverList.builder(
+                      itemCount: filteredEmails.length,
+                      itemBuilder: (context, index) {
+                        final email = filteredEmails[index];
+                        return Dismissible(
+                          key: Key(email.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                            color: Colors.red,
+                            child: const Icon(Icons.delete, color: Colors.white),
+                          ),
+                          onDismissed: (direction) {
+                            ref.read(inboxProvider.notifier).deleteEmail(email.id);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Email deleted')),
+                            );
+                          },
+                          child: EmailListTile(
+                            email: email,
+                            onTap: () {
+                              // Navigate to detail screen
+                              // Navigator.pushNamed(context, '/email_detail', arguments: email.id);
+                              Navigator.of(context).push(
+                                CupertinoPageRoute(
+                                  builder: (context) => EmailDetailScreen(emailId: email.id),
+                                ),
+                              );
+            
+                              // Mark as read when tapped
+                              ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
+                            },
+                            formatTimestamp: _formatTimestamp,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
           Positioned(
             bottom: 16.0,

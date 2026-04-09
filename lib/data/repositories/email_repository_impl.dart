@@ -33,4 +33,10 @@ class EmailRepositoryImpl implements EmailRepository {
     // For simplicity, just add to the list. In a real app, this would go to a "Sent" folder.
     _emails.insert(0, email); // Add to the beginning to appear as a new email
   }
+
+  @override
+  Future<void> deleteEmail(String id) async {
+    await Future.delayed(const Duration(milliseconds: 300)); // Simulate network delay
+    _emails.removeWhere((email) => email.id == id);
+  }
 }
