@@ -14,6 +14,7 @@ final ThemeData lightTheme = ThemeData.light().copyWith(
     primary: Color(0xff5269FF),
     secondary: Color(0xff5269FF),
     brightness: Brightness.light,
+    surface: Color(0xFFF5F5F5)
   ),
   appBarTheme: const AppBarTheme(
     backgroundColor: Color(0xff5269FF),

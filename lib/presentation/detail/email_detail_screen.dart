@@ -27,32 +27,30 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? const Color(0xFF1E1F21) : Theme.of(context).colorScheme.surface,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.archive_outlined, color: isDark ? Colors.white : Colors.grey[800]), 
+            icon: Icon(Icons.archive_outlined, color: Colors.white), 
             onPressed: () {
               ref.read(emailDetailProvider(widget.emailId).notifier).archiveEmail(widget.emailId);
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email archived')));
             }
           ),
-          IconButton(icon: Icon(Icons.delete_outline, color: isDark ? Colors.white : Colors.grey[800]), onPressed: () {}),
+          IconButton(icon: Icon(Icons.delete_outline, color: Colors.white), onPressed: () {}),
           IconButton(
-            icon: Icon(Icons.mark_email_unread_outlined, color: isDark ? Colors.white : Colors.grey[800]), 
+            icon: Icon(Icons.mark_email_unread_outlined, color: Colors.white), 
             onPressed: () {
               ref.read(emailDetailProvider(widget.emailId).notifier).toggleReadStatus(widget.emailId, false);
               Navigator.pop(context);
             }
           ),
-          IconButton(icon: Icon(Icons.more_vert, color: isDark ? Colors.white : Colors.grey[800]), onPressed: () {}),
+          IconButton(icon: Icon(Icons.more_vert, color: Colors.white), onPressed: () {}),
         ],
       ),
       body: emailDetailAsyncValue.when(
@@ -166,8 +164,16 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                           margin: const EdgeInsets.all(16),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                            // border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                            color: Theme.of(context).colorScheme.surface,
                             borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,9 +211,16 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                         padding: const EdgeInsets.all(16),
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF191A1C) : Colors.white,
-                          border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                          color: Theme.of(context).colorScheme.surface,
+                          // border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
                           borderRadius: BorderRadius.circular(8),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 4,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -240,8 +253,8 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                           icon: const Icon(Icons.reply),
                           label: const Text('Reply'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: isDark ? const Color(0xFF3F445A) : const Color(0xFFE8DEF8),
-                            foregroundColor: isDark ? const Color(0xFFE2E2E9) : const Color(0xFF1D192B),
+                            backgroundColor: Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
@@ -253,8 +266,8 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                           icon: const Icon(Icons.forward),
                           label: const Text('Forward'),
                           style: FilledButton.styleFrom(
-                            backgroundColor: isDark ? const Color(0xFF3F445A) : const Color(0xFFE8DEF8),
-                            foregroundColor: isDark ? const Color(0xFFE2E2E9) : const Color(0xFF1D192B),
+                            backgroundColor: Theme.of(context).colorScheme.surface,
+                            foregroundColor: Theme.of(context).colorScheme.onSurface,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
@@ -262,12 +275,12 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                       const SizedBox(width: 8),
                       Container(
                         decoration: BoxDecoration(
-                          color: isDark ? const Color(0xFF3F445A) : const Color(0xFFE8DEF8),
+                          color: Theme.of(context).colorScheme.primary,
                           shape: BoxShape.circle,
                         ),
                         child: IconButton(
                           icon: const Icon(Icons.emoji_emotions_outlined),
-                          color: isDark ? const Color(0xFFE2E2E9) : const Color(0xFF1D192B),
+                          color: Colors.white,
                           onPressed: () {},
                         ),
                       ),
