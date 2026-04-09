@@ -5,7 +5,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ComposeEmailScreen extends ConsumerStatefulWidget {
-  const ComposeEmailScreen({super.key});
+  final String? initialTo;
+  final String? initialSubject;
+  final String? initialBody;
+
+  const ComposeEmailScreen({
+    super.key,
+    this.initialTo,
+    this.initialSubject,
+    this.initialBody,
+  });
 
   @override
   ConsumerState<ComposeEmailScreen> createState() =>
@@ -13,9 +22,9 @@ class ComposeEmailScreen extends ConsumerStatefulWidget {
 }
 
 class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
-  final _subjectCtrl = TextEditingController();
-  final _bodyCtrl = TextEditingController();
-  final _toCtrl = TextEditingController();
+  late final TextEditingController _subjectCtrl;
+  late final TextEditingController _bodyCtrl;
+  late final TextEditingController _toCtrl;
   final _ccCtrl = TextEditingController();
   final _bccCtrl = TextEditingController();
 
@@ -25,6 +34,18 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
 
   final List<Recipient> _recipients = [];
   final List<Attachment> _attachments = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _subjectCtrl = TextEditingController(text: widget.initialSubject);
+    _bodyCtrl = TextEditingController(text: widget.initialBody);
+    _toCtrl = TextEditingController();
+
+    if (widget.initialTo != null && widget.initialTo!.isNotEmpty) {
+      _recipients.add(Recipient(name: widget.initialTo!, email: widget.initialTo!));
+    }
+  }
 
   @override
   void dispose() {
@@ -57,6 +78,9 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
   }
 
   Future<void> _send() async {
+    if (_toCtrl.text.isNotEmpty) {
+      _addRecipient(_toCtrl.text);
+    }
     if (_recipients.isEmpty) {
       _showSnack('Please add at least one recipient.');
       return;
@@ -70,44 +94,23 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
       _bodyCtrl.text += '--\nSent from MailFlow';
     }
 
-    _sendCancelled = false;
-    final theme = Theme.of(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Sending...'),
-        duration: const Duration(seconds: 5),
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'UNDO',
-          textColor: theme.colorScheme.primary,
-          onPressed: () {
-            _sendCancelled = true;
-          },
-        ),
-      ),
-    ).closed.then((reason) async {
-       if (_sendCancelled) {
-          _showSnack('Send canceled');
-          return;
-       }
+    setState(() => _isSending = true);
+    
+    final success = await ref.read(composeProvider.notifier).sendEmail(
+          recipientEmail: _recipients.map((r) => r.email).join(', '),
+          subject: _subjectCtrl.text,
+          body: _bodyCtrl.text,
+        );
 
-       setState(() => _isSending = true);
-       final success = await ref.read(composeProvider.notifier).sendEmail(
-             recipientEmail: _recipients.map((r) => r.email).join(', '),
-             subject: _subjectCtrl.text,
-             body: _bodyCtrl.text,
-           );
-
-       if (mounted) {
-         setState(() => _isSending = false);
-         if (success) {
-           _showSnack('Email sent successfully!');
-           Navigator.of(context).maybePop();
-         } else {
-           _showSnack('Failed to send email');
-         }
-       }
-    });
+    if (mounted) {
+      setState(() => _isSending = false);
+      if (success) {
+        _showSnack('Email sent successfully!');
+        Navigator.of(context).maybePop();
+      } else {
+        _showSnack('Failed to send email');
+      }
+    }
   }
 
   void _showSnack(String msg) {

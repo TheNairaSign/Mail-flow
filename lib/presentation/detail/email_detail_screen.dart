@@ -1,4 +1,5 @@
 import 'package:email_snaarp/presentation/detail/detail_provider.dart';
+import 'package:email_snaarp/presentation/compose/compose_email.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -98,7 +99,7 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.blue[900]?.withOpacity(0.3) : Colors.blue[100],
+                            color: isDark ? Colors.blue[900]?.withValues(alpha: 0.3) : Colors.blue[100],
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(
@@ -249,7 +250,17 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                     children: [
                       Expanded(
                         child: FilledButton.tonalIcon(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ComposeEmailScreen(
+                                  initialTo: email.senderEmail,
+                                  initialSubject: 'Re: ${email.subject}',
+                                ),
+                              ),
+                            );
+                          },
                           icon: const Icon(Icons.reply),
                           label: const Text('Reply'),
                           style: FilledButton.styleFrom(
@@ -262,7 +273,17 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: FilledButton.tonalIcon(
-                          onPressed: () {},
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => ComposeEmailScreen(
+                                  initialSubject: 'Fwd: ${email.subject}',
+                                  initialBody: '\n\n---------- Forwarded message ---------\nFrom: ${email.senderName} <${email.senderEmail}>\nDate: ${_formatDate(email.timestamp)}\nSubject: ${email.subject}\nTo: ${email.recipientEmail}\n\n${email.fullBody}',
+                                ),
+                              ),
+                            );
+                          },
                           icon: const Icon(Icons.forward),
                           label: const Text('Forward'),
                           style: FilledButton.styleFrom(
@@ -272,18 +293,18 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: IconButton(
-                          icon: const Icon(Icons.emoji_emotions_outlined),
-                          color: Colors.white,
-                          onPressed: () {},
-                        ),
-                      ),
+                      // const SizedBox(width: 8),
+                      // Container(
+                      //   decoration: BoxDecoration(
+                      //     color: Theme.of(context).colorScheme.primary,
+                      //     shape: BoxShape.circle,
+                      //   ),
+                      //   child: IconButton(
+                      //     icon: const Icon(Icons.emoji_emotions_outlined),
+                      //     color: Colors.white,
+                      //     onPressed: () {},
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),
