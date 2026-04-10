@@ -3,6 +3,7 @@ import 'package:email_snaarp/presentation/detail/models/compose_models.dart';
 import 'package:email_snaarp/presentation/detail/widgets/compose_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:file_picker/file_picker.dart';
 
 class ComposeEmailScreen extends ConsumerStatefulWidget {
   final String? initialTo;
@@ -71,10 +72,19 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
   void _removeAttachment(Attachment a) =>
       setState(() => _attachments.remove(a));
 
-  void _pickAttachment() {
-    setState(() {
-      _attachments.add(const Attachment(filename: 'attachment.pdf'));
-    });
+  Future<void> _pickAttachment() async {
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['jpg', 'png', 'jpeg', 'pdf', 'doc', 'docx'],
+    );
+    if (result != null && result.files.isNotEmpty) {
+      final file = result.files.first;
+      if (file.path != null) {
+        setState(() {
+          _attachments.add(Attachment(filename: file.name, path: file.path));
+        });
+      }
+    }
   }
 
   Future<void> _send() async {
@@ -100,6 +110,7 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
           recipientEmail: _recipients.map((r) => r.email).join(', '),
           subject: _subjectCtrl.text,
           body: _bodyCtrl.text,
+          attachments: _attachments.where((a) => a.path != null).map((a) => a.path!).toList(),
         );
 
     if (mounted) {
@@ -185,6 +196,7 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
@@ -213,7 +225,8 @@ class _ComposeEmailScreenState extends ConsumerState<ComposeEmailScreen> {
                         ],
                       ),
                     ),
-                    const Divider(height: 1),
+                    Divider(height: 3, color: isDark ? Colors.grey[800] : Colors.grey[300]),
+                    const SizedBox(height: 10),
                     ComposeRecipientsField(
                       recipients: _recipients,
                       controller: _toCtrl,

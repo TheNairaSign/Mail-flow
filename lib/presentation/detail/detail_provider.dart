@@ -62,6 +62,15 @@ class EmailDetailNotifier extends StateNotifier<AsyncValue<EmailEntity?>> {
       }
     });
   }
+
+  void deleteEmail(String id) {
+    state.whenData((email) {
+      if (email != null) {
+        state = AsyncValue.data(email.copyWith(folder: 'bin'));
+        _inboxNotifier.deleteEmail(id);
+      }
+    });
+  }
 }
 
 final emailDetailProvider = StateNotifierProvider.family<EmailDetailNotifier, AsyncValue<EmailEntity?>, String>((ref, emailId) {

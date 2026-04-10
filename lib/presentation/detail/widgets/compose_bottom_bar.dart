@@ -142,7 +142,9 @@ class _AttachmentChip extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.picture_as_pdf,
+            attachment.filename.toLowerCase().endsWith('.pdf') 
+                ? Icons.picture_as_pdf 
+                : (attachment.filename.toLowerCase().endsWith('.doc') || attachment.filename.toLowerCase().endsWith('.docx') ? Icons.description : Icons.image),
             size: 13,
             color: theme.colorScheme.secondary,
           ),

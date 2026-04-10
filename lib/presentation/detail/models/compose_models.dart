@@ -11,5 +11,6 @@ class Recipient {
 
 class Attachment {
   final String filename;
-  const Attachment({required this.filename});
+  final String? path;
+  const Attachment({required this.filename, this.path});
 }

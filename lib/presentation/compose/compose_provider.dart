@@ -19,6 +19,7 @@ class ComposeNotifier extends StateNotifier<AsyncValue<void>> {
     required String recipientEmail,
     required String subject,
     required String body,
+    List<String> attachments = const [],
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -33,6 +34,7 @@ class ComposeNotifier extends StateNotifier<AsyncValue<void>> {
         timestamp: DateTime.now(),
         isRead: true, // Sent emails are considered read
         isStarred: false,
+        attachments: attachments,
       );
       await _sendEmailUseCase.call(newEmail);
       _inboxNotifier.fetchEmails(); // Refresh inbox to show sent email

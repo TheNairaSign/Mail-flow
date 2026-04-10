@@ -41,6 +41,7 @@ dependencies:
   universal_back_gesture: ^2.1.0
   google_fonts: ^8.0.2
   animate_do: ^4.2.0
+  file_picker: ^8.1.2
 
 dev_dependencies:
   flutter_test:

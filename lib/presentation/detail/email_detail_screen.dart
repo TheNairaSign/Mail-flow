@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:email_snaarp/presentation/detail/detail_provider.dart';
 import 'package:email_snaarp/presentation/compose/compose_email.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,14 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email archived')));
             }
           ),
-          IconButton(icon: Icon(Icons.delete_outline, color: Colors.white), onPressed: () {}),
+          IconButton(
+            icon: Icon(Icons.delete_outline, color: Colors.white), 
+            onPressed: () {
+              ref.read(emailDetailProvider(widget.emailId).notifier).deleteEmail(widget.emailId);
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Email moved to Bin')));
+            }
+          ),
           IconButton(
             icon: Icon(Icons.mark_email_unread_outlined, color: Colors.white), 
             onPressed: () {
@@ -241,6 +249,62 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                           ],
                         ),
                       ),
+                      
+                      if (email.attachments.isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 8),
+                              Text('Attachments', style: TextStyle(fontWeight: FontWeight.bold, color: isDark ? Colors.grey[300] : Colors.grey[800])),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: email.attachments.map((path) {
+                                  final isImage = path.toLowerCase().endsWith('.png') || path.toLowerCase().endsWith('.jpg') || path.toLowerCase().endsWith('.jpeg');
+                                  return Container(
+                                    width: 100,
+                                    height: 100,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(color: isDark ? Colors.grey[800]! : Colors.grey[300]!),
+                                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                    ),
+                                    child: isImage
+                                        ? ClipRRect(
+                                            borderRadius: BorderRadius.circular(8),
+                                            child: Image.file(
+                                              File(path),
+                                              fit: BoxFit.cover,
+                                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image),
+                                            ),
+                                          )
+                                        : Column(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              Icon(Icons.insert_drive_file, size: 32, color: Theme.of(context).colorScheme.primary),
+                                              const SizedBox(height: 8),
+                                              Padding(
+                                                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                                                child: Text(
+                                                  path.split('/').last,
+                                                  style: const TextStyle(fontSize: 10),
+                                                  maxLines: 2,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.center,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                  );
+                                }).toList(),
+                              ),
+                              const SizedBox(height: 16),
+                            ],
+                          ),
+                        ),
                     ],
                   ),
                 ),
