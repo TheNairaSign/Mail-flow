@@ -119,7 +119,7 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                             CircleAvatar(
                               radius: 20,
                               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
-                              backgroundImage: const NetworkImage('https://api.dicebear.com/7.x/avataaars/png?seed=Sender'),
+                              backgroundImage: NetworkImage('https://api.dicebear.com/7.x/avataaars/png?seed=${email.senderEmail}'),
                             ),
                             const SizedBox(width: 16),
                             Expanded(

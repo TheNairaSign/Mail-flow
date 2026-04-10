@@ -27,10 +27,7 @@ class EmailListTile extends ConsumerWidget {
             CircleAvatar(
               backgroundColor: Theme.of(context).colorScheme.primaryContainer,
               radius: 20,
-              child: Text(
-                email.senderName.isNotEmpty ? email.senderName[0].toUpperCase() : '?',
-                style: TextStyle(color: Theme.of(context).colorScheme.onPrimaryContainer, fontWeight: FontWeight.bold),
-              ),
+              backgroundImage: NetworkImage('https://api.dicebear.com/7.x/avataaars/png?seed=${email.senderEmail}'),
             ),
             const SizedBox(width: 14),
             Expanded(
