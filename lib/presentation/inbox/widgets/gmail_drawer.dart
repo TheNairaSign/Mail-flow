@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:email_snaarp/presentation/inbox/inbox_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -13,7 +14,9 @@ class GmailDrawer extends ConsumerWidget {
 
     void switchFolder(String folder) {
        ref.read(activeFolderProvider.notifier).state = folder;
-       Navigator.pop(context);
+       Future.delayed(const Duration(milliseconds: 150), () {
+         if (context.mounted) Navigator.pop(context);
+       });
     }
 
     return Drawer(
@@ -28,8 +31,10 @@ class GmailDrawer extends ConsumerWidget {
             ),
             Divider(height: 1, color: isDark ? Colors.grey[800] : Colors.grey[200]),
             Expanded(
-              child: ListView(
-                padding: const EdgeInsets.symmetric(vertical: 8),
+              child: FadeInLeft(
+                duration: const Duration(milliseconds: 400),
+                child: ListView(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                 children: [
                   _buildDrawerItem(
                     icon: Icons.inbox,
@@ -72,15 +77,16 @@ class GmailDrawer extends ConsumerWidget {
                   ),
                   _buildDrawerItem(icon: Icons.star_border, title: 'Starred', badge: '1', isDark: isDark, isSelected: activeFolder == 'starred', onTap: () => switchFolder('starred')),
                   // _buildDrawerItem(icon: Icons.schedule, title: 'Snoozed', isDark: isDark, isSelected: activeFolder == 'snoozed', onTap: () => switchFolder('snoozed')),
-                  _buildDrawerItem(icon: Icons.label_important_outline, title: 'Important', badge: '233', isDark: isDark, isSelected: activeFolder == 'important', onTap: () => switchFolder('important')),
+                  // _buildDrawerItem(icon: Icons.label_important_outline, title: 'Important', badge: '233', isDark: isDark, isSelected: activeFolder == 'important', onTap: () => switchFolder('important')),
                   _buildDrawerItem(icon: Icons.send_outlined, title: 'Sent', badge: '2', isDark: isDark, isSelected: activeFolder == 'sent', onTap: () => switchFolder('sent')),
                   _buildDrawerItem(icon: Icons.schedule_send_outlined, title: 'Scheduled', isDark: isDark, isSelected: activeFolder == 'scheduled', onTap: () => switchFolder('scheduled')),
-                  _buildDrawerItem(icon: Icons.outbox_outlined, title: 'Outbox', isDark: isDark, isSelected: activeFolder == 'outbox', onTap: () => switchFolder('outbox')),
-                  _buildDrawerItem(icon: Icons.insert_drive_file_outlined, title: 'Drafts', badge: '7', isDark: isDark, isSelected: activeFolder == 'drafts', onTap: () => switchFolder('drafts')),
+                  // _buildDrawerItem(icon: Icons.outbox_outlined, title: 'Outbox', isDark: isDark, isSelected: activeFolder == 'outbox', onTap: () => switchFolder('outbox')),
+                  // _buildDrawerItem(icon: Icons.insert_drive_file_outlined, title: 'Drafts', badge: '7', isDark: isDark, isSelected: activeFolder == 'drafts', onTap: () => switchFolder('drafts')),
                   _buildDrawerItem(icon: Icons.all_inbox, title: 'All mail', badge: '99+', isDark: isDark, isSelected: activeFolder == 'all mail', onTap: () => switchFolder('all mail')),
-                  _buildDrawerItem(icon: Icons.report_outlined, title: 'Spam', badge: '43', isDark: isDark, isSelected: activeFolder == 'spam', onTap: () => switchFolder('spam')),
+                  // _buildDrawerItem(icon: Icons.report_outlined, title: 'Spam', badge: '43', isDark: isDark, isSelected: activeFolder == 'spam', onTap: () => switchFolder('spam')),
                   _buildDrawerItem(icon: Icons.delete_outline, title: 'Bin', isDark: isDark, isSelected: activeFolder == 'bin', onTap: () => switchFolder('bin')),
                 ],
+                ),
               ),
             ),
           ],
@@ -98,10 +104,12 @@ class GmailDrawer extends ConsumerWidget {
     required bool isDark,
     VoidCallback? onTap,
   }) {
-    return Container(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
       margin: const EdgeInsets.only(right: 8),
       decoration: BoxDecoration(
-        color: isSelected ? (Color(0xff5269FF)) : Colors.transparent,
+        color: isSelected ? const Color(0xff5269FF) : Colors.transparent,
         borderRadius: const BorderRadius.only(topRight: Radius.circular(24), bottomRight: Radius.circular(24)),
       ),
       child: ListTile(

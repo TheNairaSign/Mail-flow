@@ -22,11 +22,17 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   bool _isFabExtended = true;
+  String _searchQuery = '';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text;
+      });
+    });
     _scrollController.addListener(() {
       if (_scrollController.offset > 10 && _isFabExtended) {
         setState(() => _isFabExtended = false);
@@ -165,8 +171,17 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                     padding: const EdgeInsets.only(top: 50.0),
                     child: Center(child: Text('Error: $err')),
                   ),
-                  data: (emails) {
+                   data: (emails) {
                     final displayEmails = emails.where((e) {
+                      if (_searchQuery.isNotEmpty) {
+                        final q = _searchQuery.toLowerCase();
+                        if (!e.subject.toLowerCase().contains(q) &&
+                            !e.senderName.toLowerCase().contains(q) &&
+                            !e.fullBody.toLowerCase().contains(q)) {
+                          return false;
+                        }
+                      }
+
                       if (activeFolder == 'primary' || activeFolder == 'inbox') {
                         return !e.isArchived && (e.category == 'primary' || e.category.isEmpty);
                       } else if (activeFolder == 'starred') {
@@ -183,7 +198,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                       return !e.isArchived;
                     }).toList();
         
-                    final isPrimary = activeFolder == 'primary' || activeFolder == 'inbox';
+                    final isPrimary = (activeFolder == 'primary' || activeFolder == 'inbox') && _searchQuery.isEmpty;
                     final itemCount = (displayEmails.isEmpty && !isPrimary) ? 1 : displayEmails.length + (isPrimary ? 3 : 0);
         
                     return Container(
@@ -259,9 +274,9 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ComposeEmailScreen())),
         icon: const Icon(Icons.edit_outlined),
-        label: const Text('Compose', style: TextStyle(fontWeight: FontWeight.w600)),
-        backgroundColor: isDark ? const Color(0xFF3F445A) : const Color(0xFFC2E7FF),
-        foregroundColor: isDark ? const Color(0xFFE2E2E9) : const Color(0xFF001D35),
+        label: const Text('Compose', style: TextStyle(fontWeight: FontWeight.w600, color: Colors.white)),
+        backgroundColor: Theme.of(context).colorScheme.primary,
+        foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         isExtended: _isFabExtended,
       ),

@@ -78,13 +78,27 @@ class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
               const SizedBox(width: 8),
             ],
           ),
-          CircleAvatar(
-            radius: 36,
-            backgroundImage: NetworkImage(activeUser.avatarUrl),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) => FadeTransition(
+              opacity: animation,
+              child: ScaleTransition(scale: animation, child: child),
+            ),
+            child: CircleAvatar(
+              key: ValueKey(activeUser.avatarUrl),
+              radius: 36,
+              backgroundImage: NetworkImage(activeUser.avatarUrl),
+            ),
           ),
           const SizedBox(height: 12),
-          Text('Hi, ${activeUser.name}!', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-          Text(activeUser.email, style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[700])),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text('Hi, ${activeUser.name}!', key: ValueKey(activeUser.name), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          ),
+          AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            child: Text(activeUser.email, key: ValueKey(activeUser.email), style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[700])),
+          ),
           const SizedBox(height: 16),
           OutlinedButton(
             onPressed: () {},
@@ -106,22 +120,29 @@ class _AccountBottomSheetState extends ConsumerState<AccountBottomSheet> {
               });
             },
           ),
-          if (_isSwitchExpanded) ...[
-            ...otherUsers.map((user) => ListTile(
-              leading: CircleAvatar(
-                radius: 16,
-                backgroundImage: NetworkImage(user.avatarUrl),
-              ),
-              title: Text(user.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-              subtitle: Text(user.email, style: const TextStyle(fontSize: 12)),
-              onTap: () {
-                ref.read(accountProvider.notifier).switchAccount(user.id);
-                // The UI updates reactively, no need to pop the bottom sheet if we want the user to see the change,
-                // but usually switching account closes the sheet.
-                Navigator.pop(context);
-              },
-            )),
-          ],
+          AnimatedSize(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            alignment: Alignment.topCenter,
+            child: !_isSwitchExpanded ? const SizedBox.shrink() : Column(
+              mainAxisSize: MainAxisSize.min,
+              children: otherUsers.map((user) => ListTile(
+                leading: CircleAvatar(
+                  radius: 16,
+                  backgroundImage: NetworkImage(user.avatarUrl),
+                ),
+                title: Text(user.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                subtitle: Text(user.email, style: const TextStyle(fontSize: 12)),
+                onTap: () {
+                  ref.read(accountProvider.notifier).switchAccount(user.id);
+                  // Delay pop so the user sees the active profile swap gracefully natively
+                  Future.delayed(const Duration(milliseconds: 250), () {
+                    if (context.mounted) Navigator.pop(context);
+                  });
+                },
+              )).toList(),
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.add),
             title: const Text('Add another account'),

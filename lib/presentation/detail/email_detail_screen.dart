@@ -160,8 +160,11 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                       ),
                       
                       // Expanded Details
-                      if (_showDetails)
-                        Container(
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                        alignment: Alignment.topCenter,
+                        child: !_showDetails ? const SizedBox.shrink() : Container(
                           margin: const EdgeInsets.all(16),
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
@@ -205,6 +208,7 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                             ],
                           ),
                         ),
+                      ),
                       
                       // Body Box mimicking image 1 dark container
                       Container(
@@ -221,7 +225,7 @@ class _EmailDetailScreenState extends ConsumerState<EmailDetailScreen> {
                               blurRadius: 4,
                               offset: const Offset(0, 2),
                             ),
-                          ],
+                          ]
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
