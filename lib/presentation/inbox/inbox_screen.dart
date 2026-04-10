@@ -1,3 +1,4 @@
+import 'package:animate_do/animate_do.dart';
 import 'package:email_snaarp/presentation/compose/compose_email.dart';
 import 'package:email_snaarp/presentation/detail/email_detail_screen.dart';
 import 'package:email_snaarp/presentation/inbox/inbox_provider.dart';
@@ -89,6 +90,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final activeFolder = ref.watch(activeFolderProvider);
     final activeUser = ref.watch(accountProvider).activeUser;
+    final displayEmails = ref.watch(filteredEmailsProvider(_searchQuery));
 
     return Scaffold(
       key: _scaffoldKey,
@@ -171,33 +173,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                     padding: const EdgeInsets.only(top: 50.0),
                     child: Center(child: Text('Error: $err')),
                   ),
-                   data: (emails) {
-                    final displayEmails = emails.where((e) {
-                      if (_searchQuery.isNotEmpty) {
-                        final q = _searchQuery.toLowerCase();
-                        if (!e.subject.toLowerCase().contains(q) &&
-                            !e.senderName.toLowerCase().contains(q) &&
-                            !e.fullBody.toLowerCase().contains(q)) {
-                          return false;
-                        }
-                      }
-
-                      if (activeFolder == 'primary' || activeFolder == 'inbox') {
-                        return !e.isArchived && (e.category == 'primary' || e.category.isEmpty);
-                      } else if (activeFolder == 'starred') {
-                        return e.isStarred;
-                      } else if (activeFolder == 'sent') {
-                        return e.folder == 'sent';
-                      } else if (activeFolder == 'all mail') {
-                        return true;
-                      } else if (activeFolder == 'bin') {
-                        return e.folder == 'trash';
-                      } else if (activeFolder == 'drafts') {
-                        return e.folder == 'drafts';
-                      }
-                      return !e.isArchived;
-                    }).toList();
-        
+                   data: (_) {
                     final isPrimary = (activeFolder == 'primary' || activeFolder == 'inbox') && _searchQuery.isEmpty;
                     final itemCount = (displayEmails.isEmpty && !isPrimary) ? 1 : displayEmails.length + (isPrimary ? 3 : 0);
         
@@ -217,10 +193,12 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                           if (displayEmails.isEmpty && !isPrimary) {
                              return Padding(
                                padding: const EdgeInsets.symmetric(vertical: 80.0),
-                               child: EmptyStateWidget(
-                                 icon: activeFolder == 'starred' ? Icons.star_border : Icons.inbox_outlined,
-                                 title: 'Nothing to see here',
-                                 subtitle: 'Your folder is empty',
+                               child: FadeIn(
+                                 child: EmptyStateWidget(
+                                   icon: activeFolder == 'starred' ? Icons.star_border : Icons.inbox_outlined,
+                                   title: 'Nothing to see here',
+                                   subtitle: 'Your folder is empty',
+                                 ),
                                ),
                              );
                           }
@@ -253,13 +231,45 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                           
                           final emailIndex = isPrimary ? index - 3 : index;
                           final email = displayEmails[emailIndex];
-                          return EmailListTile(
-                            email: email,
-                            onTap: () {
-                              ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
-                              Navigator.push(context, MaterialPageRoute(builder: (_) => EmailDetailScreen(emailId: email.id)));
-                            },
-                            formatTimestamp: _formatTimestamp,
+                          
+                          return FadeInUp(
+                            duration: Duration(milliseconds: 300 + (index * 50)), // Staggered entry
+                            child: Dismissible(
+                              key: Key(email.id),
+                              background: Container(
+                                color: Colors.green,
+                                alignment: Alignment.centerLeft,
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: ZoomIn(child: const Icon(Icons.archive_outlined, color: Colors.white)),
+                              ),
+                              secondaryBackground: Container(
+                                color: Colors.red,
+                                alignment: Alignment.centerRight,
+                                padding: const EdgeInsets.symmetric(horizontal: 20),
+                                child: ZoomIn(child: const Icon(Icons.delete_outline, color: Colors.white)),
+                              ),
+                              onDismissed: (direction) {
+                                if (direction == DismissDirection.startToEnd) {
+                                  ref.read(inboxProvider.notifier).archiveEmail(email.id);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Email archived'), duration: Duration(seconds: 2)),
+                                  );
+                                } else {
+                                  ref.read(inboxProvider.notifier).deleteEmail(email.id);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Email moved to Bin'), duration: Duration(seconds: 2)),
+                                  );
+                                }
+                              },
+                              child: EmailListTile(
+                                email: email,
+                                onTap: () {
+                                  ref.read(inboxProvider.notifier).updateEmailReadStatus(email.id, true);
+                                  Navigator.push(context, MaterialPageRoute(builder: (_) => EmailDetailScreen(emailId: email.id)));
+                                },
+                                formatTimestamp: _formatTimestamp,
+                              ),
+                            ),
                           );
                         },
                       ),

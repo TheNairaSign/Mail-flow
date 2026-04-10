@@ -37,6 +37,18 @@ class EmailRepositoryImpl implements EmailRepository {
   @override
   Future<void> deleteEmail(String id) async {
     await Future.delayed(const Duration(milliseconds: 300)); // Simulate network delay
-    _emails.removeWhere((email) => email.id == id);
+    final index = _emails.indexWhere((email) => email.id == id);
+    if (index != -1) {
+      _emails[index] = _emails[index].copyWith(folder: 'bin');
+    }
+  }
+
+  @override
+  Future<void> archiveEmail(String id) async {
+    await Future.delayed(const Duration(milliseconds: 300)); // Simulate network delay
+    final index = _emails.indexWhere((email) => email.id == id);
+    if (index != -1) {
+      _emails[index] = _emails[index].copyWith(isArchived: true);
+    }
   }
 }

@@ -84,6 +84,7 @@ class GmailDrawer extends ConsumerWidget {
                   // _buildDrawerItem(icon: Icons.insert_drive_file_outlined, title: 'Drafts', badge: '7', isDark: isDark, isSelected: activeFolder == 'drafts', onTap: () => switchFolder('drafts')),
                   _buildDrawerItem(icon: Icons.all_inbox, title: 'All mail', badge: '99+', isDark: isDark, isSelected: activeFolder == 'all mail', onTap: () => switchFolder('all mail')),
                   // _buildDrawerItem(icon: Icons.report_outlined, title: 'Spam', badge: '43', isDark: isDark, isSelected: activeFolder == 'spam', onTap: () => switchFolder('spam')),
+                  _buildDrawerItem(icon: Icons.archive_outlined, title: 'Archive', isDark: isDark, isSelected: activeFolder == 'archive', onTap: () => switchFolder('archive')),
                   _buildDrawerItem(icon: Icons.delete_outline, title: 'Bin', isDark: isDark, isSelected: activeFolder == 'bin', onTap: () => switchFolder('bin')),
                 ],
                 ),

@@ -6,4 +6,5 @@ abstract class EmailRepository {
   Future<void> updateEmailReadStatus(String id, bool isRead);
   Future<void> sendEmail(EmailEntity email);
   Future<void> deleteEmail(String id);
+  Future<void> archiveEmail(String id);
 }
